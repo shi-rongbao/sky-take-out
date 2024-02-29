@@ -75,15 +75,15 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setStatus(StatusConstant.ENABLE);
 
         // 设置员工的创建时间与更新时间
-        employee.setCreateTime(LocalDateTime.now());
-        employee.setUpdateTime(LocalDateTime.now());
+        // employee.setCreateTime(LocalDateTime.now());
+        // employee.setUpdateTime(LocalDateTime.now());
 
         // 设置当前记录创建人的id和修改人的id
         // 从ThreadLocal中获取empId的值
 
-        Long empId = BaseContext.getCurrentId();
-        employee.setCreateUser(empId);
-        employee.setUpdateUser(empId);
+        // Long empId = BaseContext.getCurrentId();
+        // employee.setCreateUser(empId);
+        // employee.setUpdateUser(empId);
 
         // 调用mapper，将对象存入数据库中
         employeeMapper.insert(employee);
@@ -126,9 +126,9 @@ public class EmployeeServiceImpl implements EmployeeService {
         // 使用spring的对象属性拷贝
         BeanUtils.copyProperties(employeeDTO, employee);
         // 更新修改时间
-        employee.setUpdateTime(LocalDateTime.now());
+        // employee.setUpdateTime(LocalDateTime.now());
         // 更新修改人id
-        employee.setUpdateUser(BaseContext.getCurrentId());
+        // employee.setUpdateUser(BaseContext.getCurrentId());
         employeeMapper.update(employee);
     }
 }
