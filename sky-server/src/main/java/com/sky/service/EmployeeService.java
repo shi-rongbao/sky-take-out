@@ -27,4 +27,12 @@ public interface EmployeeService {
      * @return 返回一个装有总记录数与当前页数据集合的对象
      */
     PageResult pageQuery(EmployeePageQueryDTO employeePageQueryDTO);
+
+    /**
+     * 启用禁用员工账号
+     * @param status 员工的启用禁用状态 使用url参数传递
+     * @param id 员工的id 路径参数传递
+     */
+    void startOrStop(Integer status, Long id);
+
 }

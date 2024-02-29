@@ -100,4 +100,16 @@ public class EmployeeServiceImpl implements EmployeeService {
         return new PageResult(page.getTotal(), page.getResult());
     }
 
+    @Override
+    public void startOrStop(Integer status, Long id) {
+        // 分析此方法应当是执行update语句
+        // update employee set status = ? where id = ?
+        // 这是一个update的SQL语句，为了让该mapper有更好的扩展性，我们可以将employee对象传给mapper
+        Employee employee = Employee.builder()
+                .status(status)
+                .id(id)
+                .build();
+        employeeMapper.update(employee);
+    }
+
 }
