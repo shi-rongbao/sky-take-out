@@ -1,8 +1,11 @@
 package com.sky.mapper;
 
+import com.github.pagehelper.Page;
 import com.sky.annotation.AutoFill;
+import com.sky.dto.DishPageQueryDTO;
 import com.sky.entity.Dish;
 import com.sky.enumeration.OperationType;
+import com.sky.vo.DishVO;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -47,4 +50,11 @@ public interface DishMapper {
      * @param ids 要批量删除的菜品的id
      */
     void deleteByIds(List<Long> ids);
+
+    /**
+     * 菜品分页查询
+     * @param dishPageQueryDTO 菜品分页查询所需要的参数
+     * @return 返回Page集合
+     */
+    Page<DishVO> pageQuery(DishPageQueryDTO dishPageQueryDTO);
 }

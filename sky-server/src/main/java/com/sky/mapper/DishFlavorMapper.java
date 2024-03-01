@@ -24,13 +24,6 @@ public interface DishFlavorMapper {
     void insertBatch(List<DishFlavor> flavors);
 
     /**
-     * 菜品分页查询
-     * @param dishPageQueryDTO 菜品分页查询所需要的参数
-     * @return 返回Page集合
-     */
-    Page<DishVO> pageQuery(DishPageQueryDTO dishPageQueryDTO);
-
-    /**
      * 根据dishId删除菜品关联的口味信息
      * @param dishId 被要删除口味相关联的菜品id
      */
