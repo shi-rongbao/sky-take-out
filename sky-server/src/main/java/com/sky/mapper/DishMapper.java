@@ -9,6 +9,7 @@ import com.sky.vo.DishVO;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -57,4 +58,11 @@ public interface DishMapper {
      * @return 返回Page集合
      */
     Page<DishVO> pageQuery(DishPageQueryDTO dishPageQueryDTO);
+
+    /**
+     * 将传入的dish对象修改为新的
+     * @param dish 要修改为的dish数据
+     */
+    @AutoFill(OperationType.UPDATE)  // 自动填充公共字段 UPDATE
+    void update(Dish dish);
 }
