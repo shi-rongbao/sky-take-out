@@ -2,6 +2,7 @@ package com.sky.controller.admin;
 
 import com.sky.dto.DishDTO;
 import com.sky.dto.DishPageQueryDTO;
+import com.sky.entity.Dish;
 import com.sky.result.PageResult;
 import com.sky.result.Result;
 import com.sky.service.DishService;
@@ -19,7 +20,7 @@ import java.util.List;
  * @create 2024/3/1 23:24
  * @description: 菜品管理
  */
-@RestController
+@RestController("adminDishController")
 @RequestMapping("/admin/dish")
 @Api(tags = "菜品相关接口")
 @Slf4j
@@ -66,5 +67,13 @@ public class DishController {
         log.info("跟新菜品方法：{}", dishDTO);
         dishService.updateWithFlavor(dishDTO);
         return Result.success();
+    }
+
+    @GetMapping("/list")
+    @ApiOperation("根据分类id查询菜品")
+    public Result<List<Dish>> list(Long categoryId){
+        log.info("根据分类id查询菜品：{}", categoryId);
+        List<Dish> list = dishService.list(categoryId);
+        return Result.success(list);
     }
 }

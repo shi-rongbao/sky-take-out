@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -61,8 +60,11 @@ public class DishServiceImpl implements DishService {
 
     @Override
     public PageResult pageQuery(DishPageQueryDTO dishPageQueryDTO) {
+        // 使用PageHelper进行分页，参数1，页数。参数2，每页数据量
         PageHelper.startPage(dishPageQueryDTO.getPage(), dishPageQueryDTO.getPageSize());
+        // 调用Mapper进行分页
         Page<DishVO> page = dishMapper.pageQuery(dishPageQueryDTO);
+        // 返回一个PageResult对象
         return new PageResult(page.getTotal(), page.getResult());
     }
 
@@ -131,5 +133,20 @@ public class DishServiceImpl implements DishService {
             // 向口味表中新增n条数据
             dishFlavorMapper.insertBatch(flavors);
         }
+    }
+
+    @Override
+    public List<DishVO> listWithFlavor(Dish dish) {
+
+        return dishMapper.listWithFlavor(dish);
+    }
+
+    @Override
+    public List<Dish> list(Long categoryId) {
+        Dish dish = Dish.builder()
+                .categoryId(categoryId)
+                .status(StatusConstant.ENABLE)
+                .build();
+        return dishMapper.list(dish);
     }
 }

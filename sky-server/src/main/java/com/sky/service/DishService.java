@@ -7,6 +7,7 @@ import com.sky.entity.Dish;
 import com.sky.enumeration.OperationType;
 import com.sky.result.PageResult;
 import com.sky.vo.DishVO;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
@@ -55,4 +56,11 @@ public interface DishService {
      * @return 返回菜品口味信息
      */
     List<DishVO> listWithFlavor(Dish dish);
+
+    /**
+     * 根据categoryId查询菜品
+     * @param categoryId 分类id
+     * @return 返回该分类下的所有菜品对象
+     */
+    List<Dish> list(Long categoryId);
 }

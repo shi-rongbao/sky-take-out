@@ -65,4 +65,26 @@ public interface DishMapper {
      */
     @AutoFill(OperationType.UPDATE)  // 自动填充公共字段 UPDATE
     void update(Dish dish);
+
+    /**
+     * 根据传入的dish对象查询菜品信息
+     * @param dish 传入的dish对象，里面封装了status，categoryId
+     * @return 返回查到的菜品
+     */
+    List<Dish> list(Dish dish);
+
+    /**
+     * 根据传入的dish对象查询菜品和口味信息
+     * @param dish 传入的dish对象，里面封装了status，categoryId
+     * @return 返回查到的菜品和口味信息
+     */
+    List<DishVO> listWithFlavor(Dish dish);
+
+    /**
+     * 根据setmealId查询所有菜品
+     * @param setmealId setmealId
+     * @return
+     */
+    @Select("select a.* from dish a left join setmeal_dish b on a.id = b.dish_id where b.setmeal_id = #{setmealId}")
+    List<Dish> getBySetmealId(Long setmealId);
 }
