@@ -63,4 +63,11 @@ public interface DishService {
      * @return 返回该分类下的所有菜品对象
      */
     List<Dish> list(Long categoryId);
+
+    /**
+     * 设置菜品的起售停售
+     * @param status 状态码
+     * @param id 当前菜品id
+     */
+    void startOrStop(Integer status, Long id);
 }
