@@ -25,4 +25,9 @@ public interface ShoppingCartService {
      */
     List<ShoppingCart> showShoppingCart();
 
+    /**
+     * 清空当前账户下购物车所有数据
+     */
+    void cleanShoppingCart();
+
 }
