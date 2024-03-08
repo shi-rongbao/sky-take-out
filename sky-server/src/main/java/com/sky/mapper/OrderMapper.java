@@ -75,4 +75,11 @@ public interface OrderMapper {
      */
     Double sumByMap(Map<String, Object> map);
 
+
+    /**
+     * 根据动态条件查询订单数
+     * @param map 动态条件
+     * @return 返回订单数
+     */
+    Integer countByMap(Map<String, Object> map);
 }

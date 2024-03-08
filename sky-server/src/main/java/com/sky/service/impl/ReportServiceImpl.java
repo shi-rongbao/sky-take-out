@@ -4,6 +4,7 @@ import com.sky.entity.Orders;
 import com.sky.mapper.OrderMapper;
 import com.sky.mapper.UserMapper;
 import com.sky.service.ReportService;
+import com.sky.vo.OrderReportVO;
 import com.sky.vo.TurnoverReportVO;
 import com.sky.vo.UserReportVO;
 import lombok.extern.slf4j.Slf4j;
@@ -103,5 +104,67 @@ public class ReportServiceImpl implements ReportService {
                 .totalUserList(StringUtils.join(totalUserList, ","))
                 .newUserList(StringUtils.join(newUserList, ","))
                 .build();
+    }
+
+    @Override
+    public OrderReportVO getOrdersStatistics(LocalDate begin, LocalDate end) {
+        List<LocalDate> dateList = new ArrayList<>();
+        // 将第一天放入集合中
+        dateList.add(begin);
+        // 从开始那天到结束那天都放到集合中
+        while (!begin.equals(end)) {
+            begin = begin.plusDays(1);
+            dateList.add(begin);
+        }
+
+
+        // 存放每天的总订单数
+        List<Integer> orderCountList = new ArrayList<>();
+        // 存放每天的有效订单数
+        List<Integer> validOrderCountList = new ArrayList<>();
+
+
+
+        // 遍历dateList集合，查询每天的有效订单数和订单总数
+        for (LocalDate date : dateList) {
+            // 格式化参数格式
+            LocalDateTime beginTime = LocalDateTime.of(date, LocalTime.MIN);
+            LocalDateTime endTime = LocalDateTime.of(date, LocalTime.MAX);
+            // 查询每天的有效订单数 select count(id) from orders where order_time > ? and order_time < ?
+            // 调用mapper查询订单当天订单总数
+            Integer orderCount = getOrderCount(beginTime, endTime, null);
+            // 添加到每天订单数集合中
+            orderCountList.add(orderCount);
+            // 查询每天的订单总数 select count(id) from orders where order_time > ? and order_time < ? and status = 5
+            // 调用mapper查询订单当天有效订单总数
+            Integer validOrderCount = getOrderCount(beginTime, endTime, Orders.COMPLETED);
+            // 添加到每天订单数集合中
+            validOrderCountList.add(validOrderCount);
+        }
+        // 订单总数与有效订单总数
+        Integer totalOrderCount = orderCountList.stream().reduce(Integer::sum).get();
+        Integer validOrderCont = validOrderCountList.stream().reduce(Integer::sum).get();
+
+        // 计算订单完成率
+        Double orderCompletionRate = 0.0;
+        if (totalOrderCount != 0) {
+            orderCompletionRate = validOrderCont.doubleValue() / totalOrderCount;
+        }
+        return OrderReportVO.builder()
+                .dateList(StringUtils.join(dateList,","))
+                .orderCountList(StringUtils.join(orderCountList, ","))
+                .validOrderCountList(StringUtils.join(validOrderCountList, ","))
+                .totalOrderCount(totalOrderCount)
+                .validOrderCount(validOrderCont)
+                .orderCompletionRate(orderCompletionRate)
+                .build();
+    }
+
+    private Integer getOrderCount(LocalDateTime begin, LocalDateTime end, Integer status) {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("begin", begin);
+        map.put("end", end);
+        map.put("status", status);
+        return orderMapper.countByMap(map);
     }
 }
