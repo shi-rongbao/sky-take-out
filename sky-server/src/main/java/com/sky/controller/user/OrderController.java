@@ -14,6 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author ShiRongbao
  * @create 2024/3/6 13:03
@@ -76,6 +79,13 @@ public class OrderController {
     @ApiOperation("再来一单")
     public Result repetition(@PathVariable Long id) {
         orderService.repetition(id);
+        return Result.success();
+    }
+
+    @GetMapping("/reminder/{id}")
+    @ApiOperation("客户催单方法")
+    public Result reminder(@PathVariable Long id){
+        orderService.reminder(id);
         return Result.success();
     }
 }
