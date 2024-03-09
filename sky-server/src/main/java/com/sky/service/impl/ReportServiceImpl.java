@@ -5,15 +5,20 @@ import com.sky.entity.Orders;
 import com.sky.mapper.OrderMapper;
 import com.sky.mapper.UserMapper;
 import com.sky.service.ReportService;
-import com.sky.vo.OrderReportVO;
-import com.sky.vo.SalesTop10ReportVO;
-import com.sky.vo.TurnoverReportVO;
-import com.sky.vo.UserReportVO;
+import com.sky.service.WorkspaceService;
+import com.sky.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -37,6 +42,9 @@ public class ReportServiceImpl implements ReportService {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private WorkspaceService workspaceService;
 
     @Override
     public TurnoverReportVO getTurnoverStatistics(LocalDate begin, LocalDate end) {
@@ -127,7 +135,6 @@ public class ReportServiceImpl implements ReportService {
         List<Integer> validOrderCountList = new ArrayList<>();
 
 
-
         // 遍历dateList集合，查询每天的有效订单数和订单总数
         for (LocalDate date : dateList) {
             // 格式化参数格式
@@ -154,7 +161,7 @@ public class ReportServiceImpl implements ReportService {
             orderCompletionRate = validOrderCont.doubleValue() / totalOrderCount;
         }
         return OrderReportVO.builder()
-                .dateList(StringUtils.join(dateList,","))
+                .dateList(StringUtils.join(dateList, ","))
                 .orderCountList(StringUtils.join(orderCountList, ","))
                 .validOrderCountList(StringUtils.join(validOrderCountList, ","))
                 .totalOrderCount(totalOrderCount)
@@ -185,5 +192,72 @@ public class ReportServiceImpl implements ReportService {
                 .nameList(nameList)
                 .numberList(numberList)
                 .build();
+    }
+
+    @Override
+    public void exportBusinessData(HttpServletResponse response) {
+        LocalDate dateBegin = LocalDate.now().minusDays(30);
+        LocalDate dateEnd = LocalDate.now().minusDays(1);
+
+
+        BusinessDataVO businessDataVO = workspaceService.getBusinessData(LocalDateTime.of(dateBegin, LocalTime.MIN), LocalDateTime.of(dateEnd, LocalTime.MAX));
+
+        // 通过POI将数据写入到Excel文件中
+        // 首先读取模板
+        InputStream is = this.getClass().getClassLoader().getResourceAsStream("template/运营数据报表模板.xlsx");
+        try {
+            // 基于模板文件创建一个新的Excel文件
+            XSSFWorkbook excel = new XSSFWorkbook(is);
+            // 填充数据
+            // 获取sheet页
+            XSSFSheet sheet = excel.getSheet("Sheet1");
+            // 填充时间
+            sheet.getRow(1).getCell(1).setCellValue("时间： " + dateBegin + "至" + dateEnd);
+            // 填充营业额
+            XSSFRow row = sheet.getRow(3);
+            row.getCell(2).setCellValue(businessDataVO.getTurnover());
+            // 填充订单完成率
+            row.getCell(4).setCellValue(businessDataVO.getOrderCompletionRate());
+            // 填充新增用户数
+            row.getCell(6).setCellValue(businessDataVO.getNewUsers());
+            row = sheet.getRow(4);
+            // 填充有效订单数
+            row.getCell(2).setCellValue(businessDataVO.getValidOrderCount());
+            // 填充平均订单价
+            row.getCell(4).setCellValue(businessDataVO.getUnitPrice());
+
+            // 填充30天的明细数据
+            for (int i = 0; i < 30; i++) {
+                // 遍历获取到每一天
+                LocalDate date = dateBegin.plusDays(i);
+                // 查询当天的营业额数据
+                BusinessDataVO businessData = workspaceService.getBusinessData(LocalDateTime.of(date, LocalTime.MIN), LocalDateTime.of(date, LocalTime.MAX));
+                // 获得某一行
+                row = sheet.getRow(7 + i);
+                // 填充日期
+                row.getCell(1).setCellValue(date.toString());
+                // 填充营业额
+                row.getCell(2).setCellValue(businessData.getTurnover());
+                // 填充有效订单
+                row.getCell(3).setCellValue(businessData.getValidOrderCount());
+                // 填充订单完成率
+                row.getCell(4).setCellValue(businessData.getOrderCompletionRate());
+                // 填充平均客单价
+                row.getCell(5).setCellValue(businessData.getUnitPrice());
+                // 填充新增用户数
+                row.getCell(6).setCellValue(businessData.getNewUsers());
+            }
+
+            // 通过输出流将Excel文件下载到浏览器客户端
+            ServletOutputStream os = response.getOutputStream();
+            excel.write(os);
+
+            // 关闭资源
+            os.close();
+            excel.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 }
